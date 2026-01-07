@@ -40,12 +40,10 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build selected variant
-      run: |
-        echo "Building variant: ${{ github.event.inputs.variant }}"
-        ./gradlew assemble${{ github.event.inputs.variant }}
+      run: ./gradlew assemble${{ github.event.inputs.variant }}
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: app-${{ github.event.inputs.variant }}-apk
-        path: **/build/outputs/apk/**/${{ contains(github.event.inputs.variant, 'Release') && 'release' || 'debug' }}/*.apk
+        path: **/build/outputs/apk/**/*.apk
