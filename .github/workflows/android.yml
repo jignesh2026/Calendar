@@ -6,6 +6,21 @@ on:
   pull_request:
     branches: [ "main" ]
 
+  workflow_dispatch:
+    inputs:
+      variant:
+        description: "Select build variant"
+        required: true
+        default: "coreRelease"
+        type: choice
+        options:
+          - coreRelease
+          - fossRelease
+          - gplayRelease
+          - coreDebug
+          - fossDebug
+          - gplayDebug
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -24,11 +39,13 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build Release APK only
-      run: ./gradlew assembleRelease
+    - name: Build selected variant
+      run: |
+        echo "Building variant: ${{ github.event.inputs.variant }}"
+        ./gradlew assemble${{ github.event.inputs.variant }}
 
-    - name: Upload Release APK
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release-apk
-        path: **/build/outputs/apk/release/*.apk
+        name: app-${{ github.event.inputs.variant }}-apk
+        path: **/build/outputs/apk/**/${{ contains(github.event.inputs.variant, 'Release') && 'release' || 'debug' }}/*.apk
